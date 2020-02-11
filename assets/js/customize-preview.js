@@ -1,150 +1,186 @@
+/* global twentyTwentyBgColors, twentyTwentyPreviewEls, jQuery, _, wp */
 /**
- * File customize-preview.js.
+ * Customizer enhancements for a better user experience.
  *
- * Instantly live-update customizer settings in the preview for improved user experience.
+ * Contains handlers to make Theme Customizer preview reload changes asynchronously.
+ *
+ * @since 1.0.0
  */
 
-(function( $ ) {
+( function( $, api, _ ) {
+	/**
+	 * Return a value for our partial refresh.
+	 *
+	 * @param {Object} partial  Current partial.
+	 *
+	 * @return {jQuery.Promise} Resolved promise.
+	 */
+	function returnDeferred( partial ) {
+		var deferred = new $.Deferred();
 
-	// Collect information from customize-controls.js about which panels are opening.
-	wp.customize.bind( 'preview-ready', function() {
+		deferred.resolveWith( partial, _.map( partial.placements(), function() {
+			return '';
+		} ) );
 
-		// Initially hide the theme option placeholders on load
-		$( '.panel-placeholder' ).hide();
+		return deferred.promise();
+	}
 
-		wp.customize.preview.bind( 'section-highlight', function( data ) {
+	// Selective refresh for "Fixed Background Image"
+	api.selectiveRefresh.partialConstructor.cover_fixed = api.selectiveRefresh.Partial.extend( {
 
-			// Only on the front page.
-			if ( ! $( 'body' ).hasClass( 'twentyseventeen-front-page' ) ) {
-				return;
+		/**
+		 * Override the refresh method
+		 *
+		 * @return {jQuery.Promise} Resolved promise.
+		 */
+		refresh: function() {
+			var partial, cover, params;
+
+			partial = this;
+			params = partial.params;
+			cover = $( params.selector );
+
+			if ( cover.length && cover.hasClass( 'bg-image' ) ) {
+				cover.toggleClass( 'bg-attachment-fixed' );
 			}
 
-			// When the section is expanded, show and scroll to the content placeholders, exposing the edit links.
-			if ( true === data.expanded ) {
-				$( 'body' ).addClass( 'highlight-front-sections' );
-				$( '.panel-placeholder' ).slideDown( 200, function() {
-					$.scrollTo( $( '#panel1' ), {
-						duration: 600,
-						offset: { 'top': -70 } // Account for sticky menu.
-					});
-				});
+			return returnDeferred( partial );
+		}
 
-			// If we've left the panel, hide the placeholders and scroll back to the top.
-			} else {
-				$( 'body' ).removeClass( 'highlight-front-sections' );
-				// Don't change scroll when leaving - it's likely to have unintended consequences.
-				$( '.panel-placeholder' ).slideUp( 200 );
+	} );
+
+	// Selective refresh for "Image Overlay Opacity"
+	api.selectiveRefresh.partialConstructor.cover_opacity = api.selectiveRefresh.Partial.extend( {
+
+		/**
+		 * Input attributes.
+		 *
+		 * @type {Object}
+		 */
+		attrs: {},
+
+		/**
+		 * Override the refresh method
+		 *
+		 * @return {jQuery.Promise} Resolved promise.
+		 */
+		refresh: function() {
+			var partial, ranges, attrs, setting, params, cover, className, classNames;
+
+			partial = this;
+			attrs = partial.attrs;
+			ranges = _.range( attrs.min, attrs.max + attrs.step, attrs.step );
+			params = partial.params;
+			setting = api( params.primarySetting );
+			cover = $( params.selector );
+
+			if ( cover.length ) {
+				classNames = _.map( ranges, function( val ) {
+					return 'opacity-' + val;
+				} );
+
+				className = classNames[ ranges.indexOf( parseInt( setting.get(), 10 ) ) ];
+
+				cover.removeClass( classNames.join( ' ' ) );
+				cover.addClass( className );
 			}
-		});
-	});
 
-	// Site title and description.
-	wp.customize( 'blogname', function( value ) {
-		value.bind( function( to ) {
-			$( '.site-title a' ).text( to );
-		});
-	});
-	wp.customize( 'blogdescription', function( value ) {
-		value.bind( function( to ) {
-			$( '.site-description' ).text( to );
-		});
-	});
+			return returnDeferred( partial );
+		}
 
-	// Header text color.
-	wp.customize( 'header_textcolor', function( value ) {
+	} );
+
+	// Add listener for the "header_footer_background_color" control.
+	api( 'header_footer_background_color', function( value ) {
 		value.bind( function( to ) {
-			if ( 'blank' === to ) {
-				$( '.site-title, .site-description' ).css({
-					clip: 'rect(1px, 1px, 1px, 1px)',
-					position: 'absolute'
-				});
-				// Add class for different logo styles if title and description are hidden.
-				$( 'body' ).addClass( 'title-tagline-hidden' );
+			// Add background color to header and footer wrappers.
+			$( 'body:not(.overlay-header)#site-header, #site-footer' ).css( 'background-color', to );
+
+			// Change body classes if this is the same background-color as the content background.
+			if ( to.toLowerCase() === api( 'background_color' ).get().toLowerCase() ) {
+				$( 'body' ).addClass( 'reduced-spacing' );
 			} else {
-
-				// Check if the text color has been removed and use default colors in theme stylesheet.
-				if ( ! to.length ) {
-					$( '#twentyseventeen-custom-header-styles' ).remove();
-				}
-				$( '.site-title, .site-description' ).css({
-					clip: 'auto',
-					position: 'relative'
-				});
-				$( '.site-branding, .site-branding a, .site-description, .site-description a' ).css({
-					color: to
-				});
-				// Add class for different logo styles if title and description are visible.
-				$( 'body' ).removeClass( 'title-tagline-hidden' );
-			}
-		});
-	});
-
-	// Color scheme.
-	wp.customize( 'colorscheme', function( value ) {
-		value.bind( function( to ) {
-
-			// Update color body class.
-			$( 'body' )
-				.removeClass( 'colors-light colors-dark colors-custom' )
-				.addClass( 'colors-' + to );
-		});
-	});
-
-	// Custom color hue.
-	wp.customize( 'colorscheme_hue', function( value ) {
-		value.bind( function( to ) {
-
-			// Update custom color CSS.
-			var style = $( '#custom-theme-colors' ),
-				hue = style.data( 'hue' ),
-				css = style.html();
-
-			// Equivalent to css.replaceAll, with hue followed by comma to prevent values with units from being changed.
-			css = css.split( hue + ',' ).join( to + ',' );
-			style.html( css ).data( 'hue', to );
-		});
-	});
-
-	// Page layouts.
-	wp.customize( 'page_layout', function( value ) {
-		value.bind( function( to ) {
-			if ( 'one-column' === to ) {
-				$( 'body' ).addClass( 'page-one-column' ).removeClass( 'page-two-column' );
-			} else {
-				$( 'body' ).removeClass( 'page-one-column' ).addClass( 'page-two-column' );
+				$( 'body' ).removeClass( 'reduced-spacing' );
 			}
 		} );
 	} );
 
-	// Whether a header image is available.
-	function hasHeaderImage() {
-		var image = wp.customize( 'header_image' )();
-		return '' !== image && 'remove-header' !== image;
-	}
+	// Add listener for the "background_color" control.
+	api( 'background_color', function( value ) {
+		value.bind( function( to ) {
+			// Change body classes if this is the same background-color as the header/footer background.
+			if ( to.toLowerCase() === api( 'header_footer_background_color' ).get().toLowerCase() ) {
+				$( 'body' ).addClass( 'reduced-spacing' );
+			} else {
+				$( 'body' ).removeClass( 'reduced-spacing' );
+			}
+		} );
+	} );
 
-	// Whether a header video is available.
-	function hasHeaderVideo() {
-		var externalVideo = wp.customize( 'external_header_video' )(),
-			video = wp.customize( 'header_video' )();
+	// Add listener for the accent color.
+	api( 'accent_hue', function( value ) {
+		value.bind( function() {
+			// Generate the styles.
+			// Add a small delay to be sure the accessible colors were generated.
+			setTimeout( function() {
+				Object.keys( twentyTwentyBgColors ).forEach( function( context ) {
+					twentyTwentyGenerateColorA11yPreviewStyles( context );
+				} );
+			}, 50 );
+		} );
+	} );
 
-		return '' !== externalVideo || ( 0 !== video && '' !== video );
-	}
-
-	// Toggle a body class if a custom header exists.
-	$.each( [ 'external_header_video', 'header_image', 'header_video' ], function( index, settingId ) {
-		wp.customize( settingId, function( setting ) {
-			setting.bind(function() {
-				if ( hasHeaderImage() ) {
-					$( document.body ).addClass( 'has-header-image' );
-				} else {
-					$( document.body ).removeClass( 'has-header-image' );
-				}
-
-				if ( ! hasHeaderVideo() ) {
-					$( document.body ).removeClass( 'has-header-video' );
-				}
+	// Add listeners for background-color settings.
+	Object.keys( twentyTwentyBgColors ).forEach( function( context ) {
+		wp.customize( twentyTwentyBgColors[ context ].setting, function( value ) {
+			value.bind( function() {
+				// Generate the styles.
+				// Add a small delay to be sure the accessible colors were generated.
+				setTimeout( function() {
+					twentyTwentyGenerateColorA11yPreviewStyles( context );
+				}, 50 );
 			} );
 		} );
 	} );
 
-} )( jQuery );
+	/**
+	 * Add styles to elements in the preview pane.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param {string} context The area for which we want to generate styles. Can be for example "content", "header" etc.
+	 *
+	 * @return {void}
+	 */
+	function twentyTwentyGenerateColorA11yPreviewStyles( context ) {
+		// Get the accessible colors option.
+		var a11yColors = window.parent.wp.customize( 'accent_accessible_colors' ).get(),
+			stylesheedID = 'twentytwenty-customizer-styles-' + context,
+			stylesheet = $( '#' + stylesheedID ),
+			styles = '';
+		// If the stylesheet doesn't exist, create it and append it to <head>.
+		if ( ! stylesheet.length ) {
+			$( '#twentytwenty-style-inline-css' ).after( '<style id="' + stylesheedID + '"></style>' );
+			stylesheet = $( '#' + stylesheedID );
+		}
+		if ( ! _.isUndefined( a11yColors[ context ] ) ) {
+			// Check if we have elements defined.
+			if ( twentyTwentyPreviewEls[ context ] ) {
+				_.each( twentyTwentyPreviewEls[ context ], function( items, setting ) {
+					_.each( items, function( elements, property ) {
+						if ( ! _.isUndefined( a11yColors[ context ][ setting ] ) ) {
+							styles += elements.join( ',' ) + '{' + property + ':' + a11yColors[ context ][ setting ] + ';}';
+						}
+					} );
+				} );
+			}
+		}
+		// Add styles.
+		stylesheet.html( styles );
+	}
+	// Generate styles on load. Handles page-changes on the preview pane.
+	$( document ).ready( function() {
+		twentyTwentyGenerateColorA11yPreviewStyles( 'content' );
+		twentyTwentyGenerateColorA11yPreviewStyles( 'header-footer' );
+	} );
+}( jQuery, wp.customize, _ ) );

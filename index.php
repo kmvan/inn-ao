@@ -7,61 +7,111 @@
  * It is used to display a page when nothing more specific matches a query.
  * E.g., it puts together the home page when no home.php file exists.
  *
- * @link https://codex.wordpress.org/Template_Hierarchy
+ * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
  *
  * @package WordPress
- * @subpackage Twenty_Seventeen
- * @since 1.0
- * @version 1.0
+ * @subpackage Twenty_Twenty
+ * @since 1.0.0
  */
 
-get_header(); ?>
+get_header();
+?>
 
-<div class="wrap">
-	<?php if ( is_home() && ! is_front_page() ) : ?>
-		<header class="page-header">
-			<h1 class="page-title"><?php single_post_title(); ?></h1>
-		</header>
-	<?php else : ?>
-	<header class="page-header">
-		<h2 class="page-title"><?php _e( 'Posts', 'twentyseventeen' ); ?></h2>
-	</header>
-	<?php endif; ?>
+<main id="site-content" role="main">
 
-	<div id="primary" class="content-area">
-		<main id="main" class="site-main" role="main">
+	<?php
+
+	$archive_title    = '';
+	$archive_subtitle = '';
+
+	if ( is_search() ) {
+		global $wp_query;
+
+		$archive_title = sprintf(
+			'%1$s %2$s',
+			'<span class="color-accent">' . __( 'Search:', 'twentytwenty' ) . '</span>',
+			'&ldquo;' . get_search_query() . '&rdquo;'
+		);
+
+		if ( $wp_query->found_posts ) {
+			$archive_subtitle = sprintf(
+				/* translators: %s: Number of search results */
+				_n(
+					'We found %s result for your search.',
+					'We found %s results for your search.',
+					$wp_query->found_posts,
+					'twentytwenty'
+				),
+				number_format_i18n( $wp_query->found_posts )
+			);
+		} else {
+			$archive_subtitle = __( 'We could not find any results for your search. You can give it another try through the search form below.', 'twentytwenty' );
+		}
+	} elseif ( ! is_home() ) {
+		$archive_title    = get_the_archive_title();
+		$archive_subtitle = get_the_archive_description();
+	}
+
+	if ( $archive_title || $archive_subtitle ) {
+		?>
+
+		<header class="archive-header has-text-align-center header-footer-group">
+
+			<div class="archive-header-inner section-inner medium">
+
+				<?php if ( $archive_title ) { ?>
+					<h1 class="archive-title"><?php echo wp_kses_post( $archive_title ); ?></h1>
+				<?php } ?>
+
+				<?php if ( $archive_subtitle ) { ?>
+					<div class="archive-subtitle section-inner thin max-percentage intro-text"><?php echo wp_kses_post( wpautop( $archive_subtitle ) ); ?></div>
+				<?php } ?>
+
+			</div><!-- .archive-header-inner -->
+
+		</header><!-- .archive-header -->
+
+		<?php
+	}
+
+	if ( have_posts() ) {
+
+		$i = 0;
+
+		while ( have_posts() ) {
+			$i++;
+			if ( $i > 1 ) {
+				echo '<hr class="post-separator styled-separator is-style-wide section-inner" aria-hidden="true" />';
+			}
+			the_post();
+
+			get_template_part( 'template-parts/content', get_post_type() );
+
+		}
+	} elseif ( is_search() ) {
+		?>
+
+		<div class="no-search-results-form section-inner thin">
 
 			<?php
-			if ( have_posts() ) :
-
-				/* Start the Loop */
-				while ( have_posts() ) : the_post();
-
-					/*
-					 * Include the Post-Format-specific template for the content.
-					 * If you want to override this in a child theme, then include a file
-					 * called content-___.php (where ___ is the Post Format name) and that will be used instead.
-					 */
-					get_template_part( 'template-parts/post/content', get_post_format() );
-
-				endwhile;
-
-				the_posts_pagination( array(
-					'prev_text' => twentyseventeen_get_svg( array( 'icon' => 'arrow-left' ) ) . '<span class="screen-reader-text">' . __( 'Previous page', 'twentyseventeen' ) . '</span>',
-					'next_text' => '<span class="screen-reader-text">' . __( 'Next page', 'twentyseventeen' ) . '</span>' . twentyseventeen_get_svg( array( 'icon' => 'arrow-right' ) ),
-					'before_page_number' => '<span class="meta-nav screen-reader-text">' . __( 'Page', 'twentyseventeen' ) . ' </span>',
-				) );
-
-			else :
-
-				get_template_part( 'template-parts/post/content', 'none' );
-
-			endif;
+			get_search_form(
+				array(
+					'label' => __( 'search again', 'twentytwenty' ),
+				)
+			);
 			?>
 
-		</main><!-- #main -->
-	</div><!-- #primary -->
-	<?php get_sidebar(); ?>
-</div><!-- .wrap -->
+		</div><!-- .no-search-results -->
 
-<?php get_footer();
+		<?php
+	}
+	?>
+
+	<?php get_template_part( 'template-parts/pagination' ); ?>
+
+</main><!-- #site-content -->
+
+<?php get_template_part( 'template-parts/footer-menus-widgets' ); ?>
+
+<?php
+get_footer();

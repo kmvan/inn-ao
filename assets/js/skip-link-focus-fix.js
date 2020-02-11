@@ -3,9 +3,11 @@
  *
  * Helps with accessibility for keyboard only users.
  *
+ * This is the source file for what is minified in the twentytwenty_skip_link_focus_fix() PHP function.
+ *
  * Learn more: https://git.io/vWdr2
  */
-(function() {
+( function() {
 	var isIe = /(trident|msie)/i.test( navigator.userAgent );
 
 	if ( isIe && document.getElementById && window.addEventListener ) {
@@ -28,4 +30,4 @@
 			}
 		}, false );
 	}
-})();
+}() );
