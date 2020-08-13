@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # INN AO
 
 主题官网： [https://inn-studio.com/ao-free](https://inn-studio.com/ao-free)
