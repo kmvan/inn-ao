@@ -18,6 +18,3 @@
 ## 主题预览图
 
 [访问官网查看](http://inn-studio.com/ao-free)
-=======
-INN AO 免费主题
->>>>>>> origin/master
