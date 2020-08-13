@@ -1,45 +1,20 @@
 # INN AO
 
-主题官网： [https://inn-studio.com/ao](https://inn-studio.com/ao)
+主题官网： [https://inn-studio.com/ao-free](https://inn-studio.com/ao-free)
 
 ## 主题信息
 
-* 主题名称：INN AO
-* 主题类别：图片展示，视频展示，音乐试听，会员互动，付费 VIP
-* 主题协议：PTU1.0（付费使用）
-* 主题展示：[点击查看](https://ao.inn-studio.com)
+* 主题名称：INN AO 免费主题
+* 主题类别：图片展示，视频展示，音乐试听，会员互动
+* 主题协议：GPL-3.0
+* 主题展示：[点击查看](https://ao-free.inn-studio.com)
 * 主题作者：[INN STUDIO](https://inn-studio.com)
 * 主题 QQ 群：368820272
 
 ## 主题简述
 
-这是一款豪华的 WordPress 主题。
+这是一款开源的免费主题，任何人符合 GPL-3.0 协议的都能免费使用，请勿将主题用于非法用途。
 
 ## 主题预览图
 
-[访问官网查看](http://inn-studio.com/ao)
-
-（此款主题是收费主题，使用前请联系作者购买。）
-
----
-
-INN AO theme
-
-Theme official website: [https://inn-studio.com/ao](https://inn-studio.com/ao)
-
-## Theme information
-
-* Theme name: ao no kiseki
-* Theme type: Picture/Video
-* Theme license: PTU1.0(Pay to use)
-* Demo: [Checkout](https://ao.inn-studio.com/)
-
-## Theme description
-
-This is a powerful WordPress theme.
-
-## Screenshots
-
-[checkout](https://inn-studio.com/ao)
-
-（The theme is no-free theme）
+[访问官网查看](http://inn-studio.com/ao-free)

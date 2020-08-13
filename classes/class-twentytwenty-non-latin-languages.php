@@ -6,7 +6,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Twenty
- * @since 1.0.0
+ * @since Twenty Twenty 1.0
  */
 
 if ( ! class_exists( 'TwentyTwenty_Non_Latin_Languages' ) ) {
@@ -21,12 +21,11 @@ if ( ! class_exists( 'TwentyTwenty_Non_Latin_Languages' ) ) {
 		 * Return CSS for non-latin language, if available, or null
 		 *
 		 * @param string $type Whether to return CSS for the "front-end", "block-editor" or "classic-editor".
-		 *
 		 * @return void
 		 */
 		public static function get_non_latin_css( $type = 'front-end' ) {
 
-			// Fetch users locale.
+			// Fetch site locale.
 			$locale = get_bloginfo( 'language' );
 
 			// Define fallback fonts for non-latin languages.

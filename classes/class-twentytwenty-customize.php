@@ -4,7 +4,7 @@
  *
  * @package WordPress
  * @subpackage Twenty_Twenty
- * @since 1.0.0
+ * @since Twenty Twenty 1.0
  */
 
 if ( ! class_exists( 'TwentyTwenty_Customize' ) ) {
@@ -134,7 +134,7 @@ if ( ! class_exists( 'TwentyTwenty_Customize' ) ) {
 			 * The control is a hue-only colorpicker, and there is a separate setting that holds values
 			 * for other colors calculated based on the selected hue and various background-colors on the page.
 			 *
-			 * @since 1.0.0
+			 * @since Twenty Twenty 1.0
 			 */
 
 			// Add the setting for the hue colorpicker.
@@ -414,9 +414,9 @@ if ( ! class_exists( 'TwentyTwenty_Customize' ) ) {
 		 *
 		 * @static
 		 * @access public
-		 * @since 1.0.0
+		 * @since Twenty Twenty 1.0
 		 * @param array $value The value we want to sanitize.
-		 * @return array       Returns sanitized value. Each item in the array gets sanitized separately.
+		 * @return array Returns sanitized value. Each item in the array gets sanitized separately.
 		 */
 		public static function sanitize_accent_accessible_colors( $value ) {
 
@@ -438,8 +438,7 @@ if ( ! class_exists( 'TwentyTwenty_Customize' ) ) {
 		 *
 		 * @param string $input The input from the setting.
 		 * @param object $setting The selected setting.
-		 *
-		 * @return string $input|$setting->default The input from the setting or the default setting.
+		 * @return string The input from the setting or the default setting.
 		 */
 		public static function sanitize_select( $input, $setting ) {
 			$input   = sanitize_key( $input );
@@ -451,7 +450,6 @@ if ( ! class_exists( 'TwentyTwenty_Customize' ) ) {
 		 * Sanitize boolean for checkbox.
 		 *
 		 * @param bool $checked Whether or not a box is checked.
-		 *
 		 * @return bool
 		 */
 		public static function sanitize_checkbox( $checked ) {
@@ -505,7 +503,7 @@ if ( ! function_exists( 'twentytwenty_customize_partial_site_logo' ) ) {
  */
 function twentytwenty_customize_opacity_range() {
 	/**
-	 * Filter the input attributes for opacity
+	 * Filters the input attributes for opacity
 	 *
 	 * @param array $attrs {
 	 *     The attributes
